@@ -12,6 +12,7 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -78,18 +79,31 @@ public class UserFacadeREST extends AbstractFacade<User> {
         return Response.status(Response.Status.OK).entity(usuari).build();
     }
     
-    @POST
-    @Secured
-    @Transactional
-    @Path("/{id}")
-    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public Response edit(@PathParam("id") Long id, User entity){
-        User existingCustomer = super.find(id);
-        if (existingCustomer == null){
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
-        if (!Optional.ofNullable(entity.getID()).orElse(id).equals(id)){
-            return Response.status(Response.Status.BAD_REQUEST).entity("El")
-        }
+@PUT
+@Path("{id}")
+@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+@Secured
+public Response updateCustomer(@PathParam("id") Long id, User updatedUser) {
+    User existingUser = em.find(User.class, id);
+    if (existingUser == null) {
+        // Si no existeix ,retornar un error 404
+        return Response.status(Response.Status.NOT_FOUND)
+                       .entity("Customer not found")
+                       .build();
     }
+    // Actualitza el username i email passats
+    if (updatedUser.getUsername() != null) {
+        existingUser.setUsername(updatedUser.getUsername());
+    }
+    if (updatedUser.getEmail() != null) {
+        existingUser.setEmail(updatedUser.getEmail());
+    }
+    // Guardar els canvis
+    em.merge(existingUser);
+    return Response.status(Response.Status.OK)
+                   .entity(existingUser)
+                   .build();
+}
+
 }
