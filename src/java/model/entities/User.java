@@ -1,10 +1,12 @@
 package model.entities;
 
 import java.io.Serializable;
+import java.util.List;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.xml.bind.annotation.XmlRootElement;
 
@@ -21,8 +23,11 @@ public class User implements Serializable {
     private String username; // Nombre de usuario
     private String email;    // Correo electrónico
     private String password; // Contraseña del usuario
-
     private boolean isAdmin; // Indica si el usuario tiene permisos de administrador
+    
+    @OneToMany(mappedBy = "author") // Relación uno a muchos con la clase Article
+    private List<Article> articles; // Lista de artículos escritos por el usuario
+    private String CodiArticle;
 
     // Getters y Setters
     public Long getId() {
@@ -64,7 +69,23 @@ public class User implements Serializable {
     public void setAdmin(boolean isAdmin) {
         this.isAdmin = isAdmin;
     }
+    
+    public List<Article> getArticles() {
+        return articles;
+    }
 
+    public void setArticles(List<Article> articles) {
+        this.articles = articles;
+    }
+    
+    public String getCodiArticle() {
+        return CodiArticle;
+    }
+    public void setCodiArticle(String CodiArticle) {
+        this.CodiArticle = CodiArticle;
+    }
+    
+    
     // hashCode, equals y toString
     @Override
     public int hashCode() {

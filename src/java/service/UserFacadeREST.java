@@ -4,11 +4,16 @@
  */
 package service;
 
+import authn.Secured;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -36,8 +41,8 @@ public class UserFacadeREST extends AbstractFacade<User> {
     }
 
     @GET
-@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-public Response getCustomers() {
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public Response getCustomers() {
         // Consultar users
     String query = "SELECT u FROM Usuari u";
     List<User> users = em.createQuery(query, User.class).getResultList();
@@ -57,6 +62,7 @@ public Response getCustomers() {
     return Response.status(Response.Status.OK)
                    .entity(retorn)
                    .build();
+    }
     
     @GET
     @Path("/{id}")
@@ -77,8 +83,8 @@ public Response getCustomers() {
     @Transactional
     @Path("/{id}")
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public Response edit(@PathParam("id") Long id, Customer entity){
-        Customer existingCustomer = super.find(id);
+    public Response edit(@PathParam("id") Long id, User entity){
+        User existingCustomer = super.find(id);
         if (existingCustomer == null){
             return Response.status(Response.Status.NOT_FOUND).build();
         }
