@@ -57,4 +57,33 @@ public Response getCustomers() {
     return Response.status(Response.Status.OK)
                    .entity(retorn)
                    .build();
+    
+    @GET
+    @Path("/{id}")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public Response find(@PathParam("id") long id) {
+        User usuari = super.find(id);
+        if (usuari == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        // Excluir la contrasenya
+        usuari.setPassword(null);
+        return Response.status(Response.Status.OK).entity(usuari).build();
+    }
+    
+    @POST
+    @Secured
+    @Transactional
+    @Path("/{id}")
+    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public Response edit(@PathParam("id") Long id, Customer entity){
+        Customer existingCustomer = super.find(id);
+        if (existingCustomer == null){
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        if (!Optional.ofNullable(entity.getID()).orElse(id).equals(id)){
+            return Response.status(Response.Status.BAD_REQUEST).entity("El")
+        }
+    }
 }
