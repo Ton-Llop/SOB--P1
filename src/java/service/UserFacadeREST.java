@@ -25,9 +25,9 @@ import model.entities.Article;
 import model.entities.User;
 
 
-@Stateless
-@Path("user")
-public class UserFacadeREST extends AbstractFacade<User> {
+    @Stateless
+    @Path("user")
+    public class UserFacadeREST extends AbstractFacade<User> {
 
     @PersistenceContext(unitName = "Homework1PU")
     private EntityManager em;
@@ -79,31 +79,31 @@ public class UserFacadeREST extends AbstractFacade<User> {
         return Response.status(Response.Status.OK).entity(usuari).build();
     }
     
-@PUT
-@Path("{id}")
-@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-@Secured
-public Response updateCustomer(@PathParam("id") Long id, User UserCanviat) {
-    User UserExistent = em.find(User.class, id);
-    if (UserExistent == null) {
-        // Si no existeix ,retornar un error 404
-        return Response.status(Response.Status.NOT_FOUND)
-                       .entity("Customer not found")
+    @PUT
+    @Path("/{id}")
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @Secured
+    public Response updateCustomer(@PathParam("id") Long id, User UserCanviat) {
+        User UserExistent = em.find(User.class, id);
+        if (UserExistent == null) {
+            // Si no existeix ,retornar un error 404
+            return Response.status(Response.Status.NOT_FOUND)
+                           .entity("Customer not found")
+                           .build();
+        }
+        // Actualitza el username i email passats
+        if (UserCanviat.getUsername() != null) {
+            UserExistent.setUsername(UserCanviat.getUsername());
+        }
+        if (UserCanviat.getEmail() != null) {
+            UserExistent.setEmail(UserCanviat.getEmail());
+        }
+        // Guardar els canvis
+        em.merge(UserExistent);
+        return Response.status(Response.Status.OK)
+                       .entity(UserExistent)
                        .build();
     }
-    // Actualitza el username i email passats
-    if (UserCanviat.getUsername() != null) {
-        UserExistent.setUsername(UserCanviat.getUsername());
-    }
-    if (UserCanviat.getEmail() != null) {
-        UserExistent.setEmail(UserCanviat.getEmail());
-    }
-    // Guardar els canvis
-    em.merge(UserExistent);
-    return Response.status(Response.Status.OK)
-                   .entity(UserExistent)
-                   .build();
-}
 
 }
