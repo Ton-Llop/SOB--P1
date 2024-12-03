@@ -84,25 +84,25 @@ public class UserFacadeREST extends AbstractFacade<User> {
 @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 @Secured
-public Response updateCustomer(@PathParam("id") Long id, User updatedUser) {
-    User existingUser = em.find(User.class, id);
-    if (existingUser == null) {
+public Response updateCustomer(@PathParam("id") Long id, User UserCanviat) {
+    User UserExistent = em.find(User.class, id);
+    if (UserExistent == null) {
         // Si no existeix ,retornar un error 404
         return Response.status(Response.Status.NOT_FOUND)
                        .entity("Customer not found")
                        .build();
     }
     // Actualitza el username i email passats
-    if (updatedUser.getUsername() != null) {
-        existingUser.setUsername(updatedUser.getUsername());
+    if (UserCanviat.getUsername() != null) {
+        UserExistent.setUsername(UserCanviat.getUsername());
     }
-    if (updatedUser.getEmail() != null) {
-        existingUser.setEmail(updatedUser.getEmail());
+    if (UserCanviat.getEmail() != null) {
+        UserExistent.setEmail(UserCanviat.getEmail());
     }
     // Guardar els canvis
-    em.merge(existingUser);
+    em.merge(UserExistent);
     return Response.status(Response.Status.OK)
-                   .entity(existingUser)
+                   .entity(UserExistent)
                    .build();
 }
 
