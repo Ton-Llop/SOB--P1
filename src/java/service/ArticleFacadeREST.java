@@ -134,38 +134,47 @@ public class ArticleFacadeREST extends AbstractFacade<Article> {
     @DELETE
     @Path("/{id}")
     @Secured
-    public Response deleteArticle(@PathParam("id") Long id, @Context SecurityContext securityContext) {
-    // 1. Recuperar l'article de la base de dades
+public Response deleteArticle(@PathParam("id") Long id, @Context HttpHeaders headers) {
+    //Recuperar l'article de la base de dades
     Article article = em.find(Article.class, id);
-    
+
     if (article == null) {
-        // Art existent
+        // Art no existeix
         return Response.status(Response.Status.NOT_FOUND)
                        .entity("Article amb ID " + id + " no trobat.")
                        .build();
     }
-    
-    //  Comprovar que autentificacio
-    String usuariAutentificat = securityContext.getUserPrincipal().getName();
-    if (usuariAutentificat == null) {
+
+    //Comprobar autentificació
+    if (!validarRegistrat(headers)) {
         return Response.status(Response.Status.UNAUTHORIZED)
                        .entity("Has d'estar autentificat per fer aquesta acció!")
                        .build();
     }
 
-    // Que es autor
+    //Extreure nom user 
+    String usuariAutentificat = extractUsername(headers);
+    
+    if (usuariAutentificat == null) {
+        return Response.status(Response.Status.UNAUTHORIZED)
+                       .entity("No es va poder obtenir el nom d'usuari!")
+                       .build();
+    }
+
+    //Comprobar user  es  autor del art
     if (!article.getAuthor().getUsername().equals(usuariAutentificat)) {
         return Response.status(Response.Status.FORBIDDEN)
                        .entity("No ets l'autor d'aquest article!")
                        .build();
     }
-   
-    em.getTransaction().begin();
+
+    // Eliminar art
     em.remove(article);
-    em.getTransaction().commit();
-    // Si surt be retornem buit
+
+    //Retornar respuesta con código 204 No Content
     return Response.status(Response.Status.NO_CONTENT).build();
 }
+
 @POST
 @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
