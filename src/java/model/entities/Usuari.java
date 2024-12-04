@@ -12,18 +12,19 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 @Entity
-public class User implements Serializable {
+public class Usuari implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @SequenceGenerator(name = "User_Gen", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "User_Gen")
+    @SequenceGenerator(name = "USER_GEN", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "USER_GEN")
     private Long id;
-
-    private String username; // Nombre de usuario
-    private String email;    // Correo electrónico
-    private String password; // Contraseña del usuario
-    private boolean isAdmin; // Indica si el usuario tiene permisos de administrador
+    
+    private String nom;
+    private String username; 
+    private String email;    
+    private String password; 
+    
     
     @OneToMany(mappedBy = "author") // Relación uno a muchos con la clase Article
     private List<Article> articles; // Lista de artículos escritos por el usuario
@@ -62,12 +63,12 @@ public class User implements Serializable {
         this.password = password;
     }
 
-    public boolean isAdmin() {
-        return isAdmin;
+    public String getNom() {
+        return nom;
     }
 
-    public void setAdmin(boolean isAdmin) {
-        this.isAdmin = isAdmin;
+    public void setNom(String nom) {
+        this.nom = nom;
     }
     
     public List<Article> getArticles() {
@@ -97,10 +98,10 @@ public class User implements Serializable {
     @Override
     public boolean equals(Object object) {
         // Nota: este método no funcionará si los campos id no están configurados
-        if (!(object instanceof User)) {
+        if (!(object instanceof Usuari)) {
             return false;
         }
-        User other = (User) object;
+        Usuari other = (Usuari) object;
         if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }

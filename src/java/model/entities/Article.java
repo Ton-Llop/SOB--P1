@@ -31,7 +31,7 @@ public class Article implements Serializable {
     private int views; // Nombre de visualitzacions
 
     @ManyToOne
-    private User author; // L'autor de l'article
+    private Usuari author; // L'autor de l'article
 
     @ElementCollection
     private List<String> topics; // Llista de tòpics associats a l'article
@@ -85,11 +85,11 @@ public class Article implements Serializable {
         this.views = views;
     }
 
-    public User getAuthor() {
+    public Usuari getAuthor() {
         return author;
     }
 
-    public void setAuthor(User author) {
+    public void setAuthor(Usuari author) {
         this.author = author;
     }
 

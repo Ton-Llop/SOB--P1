@@ -22,18 +22,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import model.entities.Article;
-import model.entities.User;
+import model.entities.Usuari;
 
 
     @Stateless
-    @Path("user")
-    public class UserFacadeREST extends AbstractFacade<User> {
+    @Path("/user")
+    public class UserFacadeREST extends AbstractFacade<Usuari> {
 
     @PersistenceContext(unitName = "Homework1PU")
     private EntityManager em;
 
     public UserFacadeREST() {
-        super(User.class);
+        super(Usuari.class);
     }
 
     @Override
@@ -46,11 +46,11 @@ import model.entities.User;
     public Response getCustomers() {
         // Consultar users
     String query = "SELECT u FROM Usuari u";
-    List<User> users = em.createQuery(query, User.class).getResultList();
-    Collection<User> retorn = new ArrayList<>();
+    List<Usuari> users = em.createQuery(query, Usuari.class).getResultList();
+    Collection<Usuari> retorn = new ArrayList<>();
 
     // Recorrer users
-    for (User u : users) {
+    for (Usuari u : users) {
         u.setPassword(null);
         String linkArticle = null;
         if (u.getArticles() != null && !u.getArticles().isEmpty()) {
@@ -69,7 +69,7 @@ import model.entities.User;
     @Path("/{id}")
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response find(@PathParam("id") long id) {
-        User usuari = super.find(id);
+        Usuari usuari = super.find(id);
         if (usuari == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
@@ -84,8 +84,8 @@ import model.entities.User;
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Secured
-    public Response updateCustomer(@PathParam("id") Long id, User UserCanviat) {
-        User UserExistent = em.find(User.class, id);
+    public Response updateCustomer(@PathParam("id") Long id, Usuari UserCanviat) {
+        Usuari UserExistent = em.find(Usuari.class, id);
         if (UserExistent == null) {
             // Si no existeix ,retornar un error 404
             return Response.status(Response.Status.NOT_FOUND)

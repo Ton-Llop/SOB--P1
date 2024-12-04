@@ -20,7 +20,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import model.entities.Article;
-import model.entities.User;
+import model.entities.Usuari;
 import authn.Secured;
 import jakarta.persistence.TypedQuery;
 import jakarta.ws.rs.core.Context;
@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 
 
 @Stateless
-@Path("article")
+@Path("/article")
 public class ArticleFacadeREST extends AbstractFacade<Article> {
 
     @PersistenceContext(unitName = "Homework1PU")
@@ -174,7 +174,7 @@ public Response addArticle(Article newArticle, @Context SecurityContext security
     }
 
     // Validar que l'usuari existeix
-    User author = em.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
+    Usuari author = em.createQuery("SELECT u FROM User u WHERE u.username = :username", Usuari.class)
                     .setParameter("username", username)
                     .getResultStream()
                     .findFirst()
