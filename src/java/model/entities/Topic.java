@@ -63,9 +63,5 @@ public class Topic implements Serializable {
     public String toString() {
         return "model.entities.Topic[ id=" + id + " ]";
     }
-    
-    public String toString1() {
-        return "model.entities.Topic[ id=" + id + " ]";
-    }
-    
+  
 }   

@@ -41,21 +41,21 @@ public class ArticleFacadeREST extends AbstractFacade<Article> {
         super(Article.class);
     }
    
+
     @Override
     protected EntityManager getEntityManager() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
    
-@GET
-@Produces(MediaType.APPLICATION_JSON)
-public Response getArticles(@QueryParam("topic") List<String> topics, @QueryParam("author") String author) {
+    @GET
+    @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
+    public Response getArticles(@QueryParam("topic") List<String> topics, @QueryParam("author") String author){
  
     if (topics != null && topics.size() > 2) {
         return Response.status(Response.Status.BAD_REQUEST)
                        .entity("Només es permeten un màxim de dos tòpics.")
                        .build();
     }
-
 
     String query = "SELECT a FROM Article a WHERE 1=1";
     if (topics != null && !topics.isEmpty()) {

@@ -40,11 +40,10 @@
             "INSERT INTO " + schema + ".USER VALUES (NEXT VALUE FOR USER_GEN, 'john_doe', 'john@example.com', 'password123', false)",
             "INSERT INTO " + schema + ".USER VALUES (NEXT VALUE FOR USER_GEN, 'ton_llop', 'ton@example.com', 'contra321', true)",
             "INSERT INTO " + schema + ".COMMENT VALUES (NEXT VALUE FOR COMMENT_GEN, 'for homework1', 1)",
+            "INSERT INTO " + schema + ".CREDENTIALS VALUES (NEXT VALUE FOR CREDENTIALS_GEN, 'sob', 'sob')"
             "INSERT INTO " + schema + ".TOPIC VALUES (NEXT VALUE FOR TOPIC_GEN, 'Linux Guia')",
             "INSERT INTO " + schema + ".TOPIC VALUES (NEXT VALUE FOR TOPIC_GEN, 'Sistemes Oberts')",
             "INSERT INTO " + schema + ".TOPIC VALUES (NEXT VALUE FOR TOPIC_GEN, 'Computadors')"
-            "INSERT INTO " + schema + ".CREDENTIALS VALUES (NEXT VALUE FOR CREDENTIALS_GEN, 'sob', 'sob')"
-                   
             };
             for (String datum : data) {
                 if (stmt.executeUpdate(datum)<=0) {
