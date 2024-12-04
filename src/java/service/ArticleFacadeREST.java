@@ -125,11 +125,11 @@ public Response getArticles(@QueryParam("topic") List<String> topics, @QueryPara
                        .entity("No ets l'autor d'aquest article!")
                        .build();
     }
-
+   
     em.getTransaction().begin();
     em.remove(article);
     em.getTransaction().commit();
-
+    // Si surt be retornem buit
     return Response.status(Response.Status.NO_CONTENT).build();
 }
 
