@@ -4,6 +4,7 @@
  */
 package service;
 
+import authn.Credentials;
 import java.util.List;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
@@ -22,12 +23,17 @@ import jakarta.ws.rs.core.Response;
 import model.entities.Article;
 import model.entities.Usuari;
 import authn.Secured;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.SecurityContext;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
 
@@ -160,62 +166,114 @@ public class ArticleFacadeREST extends AbstractFacade<Article> {
     // Si surt be retornem buit
     return Response.status(Response.Status.NO_CONTENT).build();
 }
-   @POST
+@POST
 @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 @Secured
-public Response addArticle(Article newArticle, @Context SecurityContext securityContext) {
-    // Validar que l'usuari està autentificat
-    String username = securityContext.getUserPrincipal().getName();
-    if (username == null || username.isEmpty()) {
-        return Response.status(Response.Status.UNAUTHORIZED)
-                       .entity("Usuari no autentificat.")
-                       .build();
-    }
-
-    // Validar que l'usuari existeix
-    Usuari author = em.createQuery("SELECT u FROM User u WHERE u.username = :username", Usuari.class)
-                    .setParameter("username", username)
-                    .getResultStream()
-                    .findFirst()
-                    .orElse(null);
-
-    if (author == null) {
-        return Response.status(Response.Status.BAD_REQUEST)
-                       .entity("Usuari no trobat.")
-                       .build();
-    }
-
-    // Validar els tòpics proporcionats
-    if (newArticle.getTopics() == null || newArticle.getTopics().isEmpty()) {
-        return Response.status(Response.Status.BAD_REQUEST)
-                       .entity("L'article ha de tenir almenys un tòpic.")
-                       .build();
-    }
-
-    List<String> validTopics = em.createQuery("SELECT t.name FROM Topic t", String.class)
-                                 .getResultList();
-
-    for (String topic : newArticle.getTopics()) {
-        if (!validTopics.contains(topic)) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                           .entity("Tòpic invàlid: " + topic)
+public Response crearArticle(Article e, @Context HttpHeaders headers) {
+    try {
+        // 1. Validar que el usuario está autenticado
+        String username = extractUsername(headers);
+        if (username == null || username.isEmpty()) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                           .entity("Credencials invàlides o falta l'encapçalament Authorization.")
                            .build();
         }
+
+        // 2. Verificar que el usuario existe en la base de datos
+        Usuari autorBD;
+        try {
+            String queryAutor = "SELECT u FROM Usuari u WHERE u.username = :username";
+            autorBD = em.createQuery(queryAutor, Usuari.class)
+                        .setParameter("username", username)
+                        .getSingleResult();
+        } catch (NoResultException ex) {
+            return Response.status(Response.Status.NOT_FOUND).entity("Usuari no trobat").build();
+        }
+
+        // 3. Validar los tópicos proporcionados
+        List<String> llistaTopics = e.getTopics();
+        if (llistaTopics == null || llistaTopics.isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Cal proporcionar almenys un tòpic").build();
+        }
+
+        String existQuery = "SELECT t.name FROM Topic t WHERE t.name IN :noms";
+        List<String> resultatNoms = em.createQuery(existQuery, String.class)
+                                     .setParameter("noms", llistaTopics)
+                                     .getResultList();
+
+        if (llistaTopics.size() != resultatNoms.size()) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Un o més tòpics no són vàlids").build();
+        }
+
+        // 4. Configurar y persistir el artículo
+        e.setAuthor(autorBD);
+        e.setPublicationDate(LocalDateTime.now());
+        e.setViews(0);
+
+        em.persist(e);
+        
+        // 5. Retornar respuesta exitosa
+        return Response.status(Response.Status.CREATED)
+               .entity(e.getId() + " CODI CREAT")
+               .build();
+
+    } catch (Exception ex) {
+        ex.printStackTrace(); // Para depuración en los logs
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error processant l'article.").build();
     }
-
-    // Assignar les propietats automàtiques de l'article
-    newArticle.setAuthor(author);
-    newArticle.setPublicationDate(LocalDateTime.now());
-    newArticle.setViews(0); // Inicialitzar visualitzacions a 0
-
-    // Persistir l'article
-    em.persist(newArticle);
-
-    // Retornar resposta amb codi 201 Created i l'identificador de l'article
-    return Response.status(Response.Status.CREATED)
-                   .entity(newArticle.getId())
-                   .build();
 }
- 
+
+
+private boolean validarRegistrat(HttpHeaders headers) {
+    List<String> headersAuth = headers.getRequestHeader(HttpHeaders.AUTHORIZATION);
+
+    if (headersAuth == null || headersAuth.isEmpty()) {
+        return false;
+    } else {
+        try {
+            // Decodificar y extraer usuario y contraseña
+            String auth = headersAuth.get(0).replace("Basic ", "");
+            String decode = new String(Base64.getDecoder().decode(auth), StandardCharsets.UTF_8);
+            StringTokenizer tokenizer = new StringTokenizer(decode, ":");
+            String username = tokenizer.nextToken();
+            String password = tokenizer.nextToken();
+
+            // Validar credenciales contra la base de datos
+            TypedQuery<Credentials> query = em.createNamedQuery("Credentials.findUser", Credentials.class);
+            Credentials c = query.setParameter("username", username).getSingleResult();
+
+            // Comprobar si las credenciales son válidas
+            return c.getPassword().equals(password);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+}
+private String extractUsername(HttpHeaders headers) {
+    try {
+        // Obtener el encabezado Authorization
+        List<String> headersAuth = headers.getRequestHeader(HttpHeaders.AUTHORIZATION);
+        
+        // Validar que el encabezado esté presente
+        if (headersAuth == null || headersAuth.isEmpty()) {
+            System.out.println("Encabezado Authorization no encontrado.");
+            return null;
+        }
+
+        // Obtener el valor del encabezado y decodificarlo
+        String auth = headersAuth.get(0).replace("Basic ", "");
+        String decode = new String(Base64.getDecoder().decode(auth), StandardCharsets.UTF_8);
+
+        // Extraer el username (antes de ':')
+        String username = decode.split(":")[0];
+        return username;
+
+    } catch (Exception e) {
+        // Registrar el error y retornar null
+        System.out.println("Error extrayendo el nombre de usuario: " + e.getMessage());
+        return null;
+    }
+}
+
 }

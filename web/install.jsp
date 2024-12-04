@@ -38,6 +38,7 @@
             String data[] = new String[]{
                 // Inserint usuaris
             "INSERT INTO " + schema + ".USUARI (id, nom, username, email) VALUES (NEXT VALUE FOR USER_GEN, 'john', 'john_doe', 'john@example.com')",
+            "INSERT INTO " + schema + ".USUARI (id, nom, username, email) VALUES (NEXT VALUE FOR USER_GEN, 'sob_john', 'sob', 'sob@example.com')",
             "INSERT INTO " + schema + ".USUARI (id, nom, username, email) VALUES (NEXT VALUE FOR USER_GEN, 'ton', 'ton_llop', 'ton@example.com')",
             "INSERT INTO " + schema + ".CREDENTIALS VALUES (NEXT VALUE FOR CREDENTIALS_GEN, 'sob', 'sob')",
             "INSERT INTO " + schema + ".TOPIC VALUES (NEXT VALUE FOR TOPIC_GEN, 'Linux Guia')",
