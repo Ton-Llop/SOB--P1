@@ -95,8 +95,33 @@ public class ArticleFacadeREST extends AbstractFacade<Article> {
     }).collect(Collectors.toList());
 
     return Response.ok(result).build();
-}
-
+    }
+    
+    
+    @GET
+    @PATH({"/id"})
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public Response getArticleId(@PathParam("id")long id, @Context SecurityContext securityContext){
+        Article article = em.find(id);
+        if (article == null){
+            return Response.status(Response.Status.NOT_FOUND).entity("L'article no existeix").build();
+        }
+        //Comprovar si l'article es privat
+        if (article.isPrivate()){
+            //Comprovar que l'usuari estigui registrat
+            if (securityContext.getUserPrincipal() == null){
+                return Response.status(Response.Status.FORBIDDEN).entity("")
+            }
+            article.setViews(article.getViews() + 1);
+            em.edit(article); //Persistir els canvis en la bd
+            return Response.ok().entity(article).build();
+        }
+        article.setViews(article.getViews() + 1);
+        em.edit(article); //Persistir els canvis en la bd
+        return Response.ok().entity(article).build();
+        }
+    }
+    
     @DELETE
     @Path("/{id}")
     @Secured
