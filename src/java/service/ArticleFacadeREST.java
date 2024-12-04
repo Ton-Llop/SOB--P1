@@ -25,6 +25,7 @@ import authn.Secured;
 import jakarta.persistence.TypedQuery;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.SecurityContext;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -159,5 +160,62 @@ public class ArticleFacadeREST extends AbstractFacade<Article> {
     // Si surt be retornem buit
     return Response.status(Response.Status.NO_CONTENT).build();
 }
+   @POST
+@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+@Secured
+public Response addArticle(Article newArticle, @Context SecurityContext securityContext) {
+    // Validar que l'usuari està autentificat
+    String username = securityContext.getUserPrincipal().getName();
+    if (username == null || username.isEmpty()) {
+        return Response.status(Response.Status.UNAUTHORIZED)
+                       .entity("Usuari no autentificat.")
+                       .build();
+    }
 
+    // Validar que l'usuari existeix
+    User author = em.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
+                    .setParameter("username", username)
+                    .getResultStream()
+                    .findFirst()
+                    .orElse(null);
+
+    if (author == null) {
+        return Response.status(Response.Status.BAD_REQUEST)
+                       .entity("Usuari no trobat.")
+                       .build();
+    }
+
+    // Validar els tòpics proporcionats
+    if (newArticle.getTopics() == null || newArticle.getTopics().isEmpty()) {
+        return Response.status(Response.Status.BAD_REQUEST)
+                       .entity("L'article ha de tenir almenys un tòpic.")
+                       .build();
+    }
+
+    List<String> validTopics = em.createQuery("SELECT t.name FROM Topic t", String.class)
+                                 .getResultList();
+
+    for (String topic : newArticle.getTopics()) {
+        if (!validTopics.contains(topic)) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                           .entity("Tòpic invàlid: " + topic)
+                           .build();
+        }
+    }
+
+    // Assignar les propietats automàtiques de l'article
+    newArticle.setAuthor(author);
+    newArticle.setPublicationDate(LocalDateTime.now());
+    newArticle.setViews(0); // Inicialitzar visualitzacions a 0
+
+    // Persistir l'article
+    em.persist(newArticle);
+
+    // Retornar resposta amb codi 201 Created i l'identificador de l'article
+    return Response.status(Response.Status.CREATED)
+                   .entity(newArticle.getId())
+                   .build();
+}
+ 
 }
