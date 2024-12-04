@@ -23,6 +23,8 @@ import model.entities.Article;
 import model.entities.User;
 import authn.Secured;
 import jakarta.persistence.TypedQuery;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.SecurityContext;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -37,6 +39,11 @@ public class ArticleFacadeREST extends AbstractFacade<Article> {
 
     public ArticleFacadeREST() {
         super(Article.class);
+    }
+   
+    @Override
+    protected EntityManager getEntityManager() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
    
 @GET
@@ -90,11 +97,40 @@ public Response getArticles(@QueryParam("topic") List<String> topics, @QueryPara
     return Response.ok(result).build();
 }
 
-
-
-    @Override
-    protected EntityManager getEntityManager() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    @DELETE
+    @Path("/{id}")
+    @Secured
+    public Response deleteArticle(@PathParam("id") Long id, @Context SecurityContext securityContext) {
+    // 1. Recuperar l'article de la base de dades
+    Article article = em.find(Article.class, id);
+    
+    if (article == null) {
+        // Art existent
+        return Response.status(Response.Status.NOT_FOUND)
+                       .entity("Article amb ID " + id + " no trobat.")
+                       .build();
     }
+    
+    //  Comprovar que autentificacio
+    String usuariAutentificat = securityContext.getUserPrincipal().getName();
+    if (usuariAutentificat == null) {
+        return Response.status(Response.Status.UNAUTHORIZED)
+                       .entity("Has d'estar autentificat per fer aquesta acció!")
+                       .build();
+    }
+
+    // Que es autor
+    if (!article.getAuthor().getUsername().equals(usuariAutentificat)) {
+        return Response.status(Response.Status.FORBIDDEN)
+                       .entity("No ets l'autor d'aquest article!")
+                       .build();
+    }
+
+    em.getTransaction().begin();
+    em.remove(article);
+    em.getTransaction().commit();
+
+    return Response.status(Response.Status.NO_CONTENT).build();
+}
 
 }
