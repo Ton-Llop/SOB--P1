@@ -5,7 +5,7 @@
 
 ## Definirem una API REST comuna per tothom i que els grups hauran d’implementar a les seves pràctiques.
 
-##Cal implementar els serveis REST perquè treballin i retornin JSON. Eines que us poden ser d'interès: Gson, JAXB (exemple d'ús)
+## Cal implementar els serveis REST perquè treballin i retornin JSON. Eines que us poden ser d'interès: Gson, JAXB (exemple d'ús)
 
 ## Fer servir versionat per la sostenibilitat de l’API.
 Pels articles:
