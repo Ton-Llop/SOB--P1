@@ -98,7 +98,9 @@ import model.entities.Usuari;
     public Response find(@PathParam("id") long id) {
         Usuari usuari = super.find(id);
         if (usuari == null) {
-            return Response.status(Response.Status.NOT_FOUND).build();
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("L'usuari no existeix")
+                    .build();
         }
 
         // Excluir la contrasenya
@@ -125,7 +127,7 @@ import model.entities.Usuari;
         if (UserExistent == null) {
             // Si no existeix ,retornar un error 404
             return Response.status(Response.Status.NOT_FOUND)
-                           .entity("Customer not found")
+                           .entity("L'usuari no existeix")
                            .build();
         }
         // Actualitza el username i email passats
