@@ -108,7 +108,7 @@ public class ArticleFacadeREST extends AbstractFacade<Article> {
 @GET
 @Path("/{id}")
 @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-public Response obtenirArticle (@PathParam("id") Long id, @Context HttpHeaders headers) {
+public Response obtenirArticle(@PathParam("id") Long id, @Context HttpHeaders headers) {
     try {
         System.out.println("Buscando artículo con ID: " + id);
 
@@ -125,21 +125,12 @@ public Response obtenirArticle (@PathParam("id") Long id, @Context HttpHeaders h
         System.out.println("Artículo encontrado: " + article);
 
         // Comprobar si el artículo es privado
-        if (article.getIsPrivate() != null && article.getIsPrivate()) {
-            System.out.println("El artículo es privado. Validando usuario...");
+        if (article.getIsPrivate()) {
             
-            // Validar que el usuario esté registrado
+            // Esta reg?
             if (!validarRegistrat(headers)) {
                 return Response.status(Response.Status.UNAUTHORIZED)
                                .entity("Aquest article és privat i has d'estar registrat")
-                               .build();
-            }
-
-            // Validar que el usuario es el autor del artículo
-            String username = extractUsername(headers);
-            if (username == null || !username.equals(article.getAuthor().getUsername())) {
-                return Response.status(Response.Status.FORBIDDEN)
-                               .entity("No ets l'autor d'aquest article!")
                                .build();
             }
         }
@@ -163,11 +154,12 @@ public Response obtenirArticle (@PathParam("id") Long id, @Context HttpHeaders h
 
 
 
+
     
     @DELETE
     @Path("/{id}")
     // Decisió de disseny treiem el @secured i ho comprovem manualment.
-public Response deleteArticle(@PathParam("id") Long id, @Context HttpHeaders headers) {
+    public Response deleteArticle(@PathParam("id") Long id, @Context HttpHeaders headers) {
     //Recuperar l'article de la base de dades
     Article article = em.find(Article.class, id);
 
@@ -251,7 +243,7 @@ public Response crearArticle(Article e, @Context HttpHeaders headers) {
         if (llistaTopics.size() != resultatNoms.size()) {
             return Response.status(Response.Status.BAD_REQUEST).entity("Un o més tòpics no són vàlids").build();
         }
-       
+        
         e.setAuthor(autorBD);
         e.setPublicationDate(LocalDateTime.now());
         e.setViews(0);

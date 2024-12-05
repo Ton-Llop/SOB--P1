@@ -28,6 +28,7 @@ public class Article implements Serializable {
 
     private String title; // Títol de l'article
     private String content; // Contingut complet de l'article
+    
     private Boolean isPrivate = false; //
 
     private LocalDateTime publicationDate; // Data de publicació
@@ -68,9 +69,10 @@ public class Article implements Serializable {
         return isPrivate;
     }
 
-    public void setPrivate(Boolean isPrivate) {
-        this.isPrivate = isPrivate;
-    }
+    public void setIsPrivate(Boolean isPrivate) {
+    this.isPrivate = isPrivate;
+}
+
 
     public LocalDateTime getPublicationDate() {
         return publicationDate;
