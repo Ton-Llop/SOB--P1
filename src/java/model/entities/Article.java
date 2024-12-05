@@ -1,5 +1,6 @@
 package model.entities;
 
+import jakarta.persistence.Column;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -12,6 +13,8 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.ElementCollection;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.json.bind.annotation.JsonbTransient;
+
 
 @Entity
 @XmlRootElement
@@ -25,7 +28,7 @@ public class Article implements Serializable {
 
     private String title; // Títol de l'article
     private String content; // Contingut complet de l'article
-    private boolean isPrivate; // Indica si l'article és privat
+    private Boolean isPrivate = false; //
 
     private LocalDateTime publicationDate; // Data de publicació
     private int views; // Nombre de visualitzacions
@@ -60,12 +63,12 @@ public class Article implements Serializable {
     public void setContent(String content) {
         this.content = content;
     }
-
-    public boolean isPrivate() {
+    
+    public Boolean getIsPrivate() {
         return isPrivate;
     }
 
-    public void setPrivate(boolean isPrivate) {
+    public void setPrivate(Boolean isPrivate) {
         this.isPrivate = isPrivate;
     }
 
@@ -84,7 +87,8 @@ public class Article implements Serializable {
     public void setViews(int views) {
         this.views = views;
     }
-
+    
+    @JsonbTransient
     public Usuari getAuthor() {
         return author;
     }

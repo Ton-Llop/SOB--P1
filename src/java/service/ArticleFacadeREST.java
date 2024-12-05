@@ -107,44 +107,59 @@ public class ArticleFacadeREST extends AbstractFacade<Article> {
     
 @GET
 @Path("/{id}")
-@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-public Response getArticleId(@PathParam("id") long id, @Context HttpHeaders headers) {
+@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+public Response obtenirArticle (@PathParam("id") Long id, @Context HttpHeaders headers) {
     try {
+        System.out.println("Buscando artículo con ID: " + id);
+
         // Recuperar el artículo de la base de datos
-        Article article = super.find(id);
+        Article article = em.find(Article.class, id);
 
         if (article == null) {
-            return Response.status(Response.Status.NOT_FOUND).entity("L'article no existeix").build();
+            System.out.println("Artículo no encontrado.");
+            return Response.status(Response.Status.NOT_FOUND)
+                           .entity("No hi ha aquest article encara")
+                           .build();
         }
 
+        System.out.println("Artículo encontrado: " + article);
+
         // Comprobar si el artículo es privado
-        if (article.isPrivate()) {
-            String username = extractUsername(headers);
-            if (username == null || !validarRegistrat(headers)) {
+        if (article.getIsPrivate() != null && article.getIsPrivate()) {
+            System.out.println("El artículo es privado. Validando usuario...");
+            
+            // Validar que el usuario esté registrado
+            if (!validarRegistrat(headers)) {
                 return Response.status(Response.Status.UNAUTHORIZED)
-                               .entity("Has d'estar autentificat per fer aquesta acció!")
+                               .entity("Aquest article és privat i has d'estar registrat")
                                .build();
             }
-            if (!article.getAuthor().getUsername().equals(username)) {
+
+            // Validar que el usuario es el autor del artículo
+            String username = extractUsername(headers);
+            if (username == null || !username.equals(article.getAuthor().getUsername())) {
                 return Response.status(Response.Status.FORBIDDEN)
                                .entity("No ets l'autor d'aquest article!")
                                .build();
             }
         }
 
-        // Incrementar las visualizaciones de l'article
+        // Incrementar las visualizaciones del artículo
         article.setViews(article.getViews() + 1);
-        super.edit(article);  // Persistir los cambios a la base de datos
+        em.merge(article); // Persistir los cambios en la base de datos
 
+        System.out.println("Devolviendo el artículo...");
         return Response.ok().entity(article).build();
+
     } catch (Exception e) {
-        // Registrar el error completo
-        e.printStackTrace();  // En producción, usa un logger adecuado
+        e.printStackTrace(); // Registrar el error para depuración
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                       .entity("Error al procesar la solicitud: " + e.getMessage())
+                       .entity("Error al processar la sol·licitud: " + e.getMessage())
                        .build();
     }
 }
+
+
 
 
 
@@ -236,8 +251,7 @@ public Response crearArticle(Article e, @Context HttpHeaders headers) {
         if (llistaTopics.size() != resultatNoms.size()) {
             return Response.status(Response.Status.BAD_REQUEST).entity("Un o més tòpics no són vàlids").build();
         }
-
-        // 4. Configurar y persistir el artículo
+       
         e.setAuthor(autorBD);
         e.setPublicationDate(LocalDateTime.now());
         e.setViews(0);
