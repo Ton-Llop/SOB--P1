@@ -51,7 +51,7 @@ public class ArticleFacadeREST extends AbstractFacade<Article> {
 
     @Override
     protected EntityManager getEntityManager() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return em;
     }
    
     @GET
@@ -105,35 +105,53 @@ public class ArticleFacadeREST extends AbstractFacade<Article> {
     }
     
     
-    @GET
-    @Path("/{id}")
-    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public Response getArticleId(@PathParam("id")long id, @Context SecurityContext securityContext){
+@GET
+@Path("/{id}")
+@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+public Response getArticleId(@PathParam("id") long id, @Context HttpHeaders headers) {
+    try {
+        // Recuperar el artículo de la base de datos
         Article article = super.find(id);
-        if (article == null){
+
+        if (article == null) {
             return Response.status(Response.Status.NOT_FOUND).entity("L'article no existeix").build();
         }
-        //Comprovar si l'article es privat
-        if (article.isPrivate()){
-            //Comprovar que l'usuari estigui registrat
-        String usuariAutentificat = securityContext.getUserPrincipal().getName();
-        if (usuariAutentificat == null) {
-            return Response.status(Response.Status.UNAUTHORIZED)
-                .entity("Has d'estar autentificat per fer aquesta acció!")
-                .build();
-    }
-            article.setViews(article.getViews() + 1);
-            super.edit(article); //Persistir els canvis en la bd
-            return Response.ok().entity(article).build();
+
+        // Comprobar si el artículo es privado
+        if (article.isPrivate()) {
+            String username = extractUsername(headers);
+            if (username == null || !validarRegistrat(headers)) {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                               .entity("Has d'estar autentificat per fer aquesta acció!")
+                               .build();
+            }
+            if (!article.getAuthor().getUsername().equals(username)) {
+                return Response.status(Response.Status.FORBIDDEN)
+                               .entity("No ets l'autor d'aquest article!")
+                               .build();
+            }
         }
+
+        // Incrementar las visualizaciones de l'article
         article.setViews(article.getViews() + 1);
-        super.edit(article); //Persistir els canvis en la bd
+        super.edit(article);  // Persistir los cambios a la base de datos
+
         return Response.ok().entity(article).build();
-        }
+    } catch (Exception e) {
+        // Registrar el error completo
+        e.printStackTrace();  // En producción, usa un logger adecuado
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                       .entity("Error al procesar la solicitud: " + e.getMessage())
+                       .build();
+    }
+}
+
+
+
     
     @DELETE
     @Path("/{id}")
-    @Secured
+    // Decisió de disseny treiem el @secured i ho comprovem manualment.
 public Response deleteArticle(@PathParam("id") Long id, @Context HttpHeaders headers) {
     //Recuperar l'article de la base de dades
     Article article = em.find(Article.class, id);
@@ -157,7 +175,7 @@ public Response deleteArticle(@PathParam("id") Long id, @Context HttpHeaders hea
     
     if (usuariAutentificat == null) {
         return Response.status(Response.Status.UNAUTHORIZED)
-                       .entity("No es va poder obtenir el nom d'usuari!")
+                       .entity("No es pot obtenir el nom d'usuari!")
                        .build();
     }
 
@@ -178,15 +196,19 @@ public Response deleteArticle(@PathParam("id") Long id, @Context HttpHeaders hea
 @POST
 @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-@Secured
+// Decisió de disseny treiem el @secured i ho comprovem manualment.
 public Response crearArticle(Article e, @Context HttpHeaders headers) {
     try {
-        // 1. Validar que el usuario está autenticado
+        
+        // Validar autentificacio
+        if (!validarRegistrat(headers)) {
+        return Response.status(Response.Status.UNAUTHORIZED)
+                       .entity("Has d'estar autentificat per fer aquesta acció!")
+                       .build();
+    }
         String username = extractUsername(headers);
         if (username == null || username.isEmpty()) {
-            return Response.status(Response.Status.UNAUTHORIZED)
-                           .entity("Credencials invàlides o falta l'encapçalament Authorization.")
-                           .build();
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Credencials invàlides o falta l'encapçalament Authorization.").build();
         }
 
         // 2. Verificar que el usuario existe en la base de datos
@@ -224,7 +246,7 @@ public Response crearArticle(Article e, @Context HttpHeaders headers) {
         
         // 5. Retornar respuesta exitosa
         return Response.status(Response.Status.CREATED)
-               .entity(e.getId() + " CODI CREAT")
+               .entity(e.getId())
                .build();
 
     } catch (Exception ex) {
