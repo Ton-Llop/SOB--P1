@@ -26,7 +26,7 @@
              * 
              * If there is any problem, it will exit at the very first error.
              */
-            String dbname = "homework1";
+            String dbname = "sob_grup_56";
             String schema = "ROOT";
             Class.forName("org.apache.derby.jdbc.ClientDriver");
             /* this will generate database if not exist */
