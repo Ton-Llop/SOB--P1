@@ -14,7 +14,7 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.ElementCollection;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.json.bind.annotation.JsonbTransient;
-
+import jakarta.persistence.JoinColumn;
 
 @Entity
 @XmlRootElement
@@ -35,11 +35,15 @@ public class Article implements Serializable {
     private int views; // Nombre de visualitzacions
 
     @ManyToOne
-    private Usuari author; // L'autor de l'article
+    @JoinColumn(name = "author", nullable = false) // Personaliza el nombre de la columna si es necesario
+    private Usuari author;
+
 
     @ElementCollection
     private List<String> topics; // Llista de tòpics associats a l'article
 
+    private String image; // URL de la imatge associada a l'article
+    
     // Getters i Setters
     public Long getId() {
         return id;
@@ -70,8 +74,8 @@ public class Article implements Serializable {
     }
 
     public void setIsPrivate(Boolean isPrivate) {
-    this.isPrivate = isPrivate;
-}
+        this.isPrivate = isPrivate;
+    }
 
 
     public LocalDateTime getPublicationDate() {
@@ -105,6 +109,14 @@ public class Article implements Serializable {
 
     public void setTopics(List<String> topics) {
         this.topics = topics;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 
     // hashCode, equals i toString
