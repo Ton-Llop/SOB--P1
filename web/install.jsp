@@ -48,9 +48,7 @@
             "INSERT INTO " + schema + ".CREDENTIALS VALUES (NEXT VALUE FOR CREDENTIALS_GEN, 'test1', 'test1')",
             "INSERT INTO " + schema + ".TOPIC VALUES (NEXT VALUE FOR TOPIC_GEN, 'Linux Guia')",
             "INSERT INTO " + schema + ".TOPIC VALUES (NEXT VALUE FOR TOPIC_GEN, 'Sistemes Oberts')",
-            "INSERT INTO " + schema + ".TOPIC VALUES (NEXT VALUE FOR TOPIC_GEN, 'Computadors')",
-            "INSERT INTO " + schema + ".ARTICLE (id, title, content, isprivate, publicationdate, views, image, author) VALUES (NEXT VALUE FOR ARTICLE_GEN, 'Primer article', 'Contingut del primer article', 1, CURRENT_TIMESTAMP, 10, 'imatge1',1)",
-            "INSERT INTO " + schema + ".ARTICLE_TOPICS (article_id, topics) VALUES (1, 'Linux Guia')"
+            "INSERT INTO " + schema + ".TOPIC VALUES (NEXT VALUE FOR TOPIC_GEN, 'Computadors')"
             };
             for (String datum : data) {
                 if (stmt.executeUpdate(datum)<=0) {

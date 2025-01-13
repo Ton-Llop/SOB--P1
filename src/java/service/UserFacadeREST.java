@@ -194,19 +194,7 @@ private String extractUsername(HttpHeaders headers) {
     } catch (Exception e) {
         // Registrar el error y retornar null
         System.out.println("Error extrayendo el nombre de usuario: " + e.getMessage());
-        return null;    
+        return null;
     }
 }
-@GET
-@Path("/LoginVerification")
-@Produces(MediaType.APPLICATION_JSON)
-public Response verifyLogin(@Context HttpHeaders headers) {
-    if (validarRegistrat(headers)) {
-        String username = extractUsername(headers);
-        return Response.ok("Usuario autenticado: " + username).build();
-    } else {
-        return Response.status(Response.Status.UNAUTHORIZED).entity("Credenciales inválidas").build();
-    }
-}
-
 }
