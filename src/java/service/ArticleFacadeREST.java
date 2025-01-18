@@ -99,6 +99,8 @@ public class ArticleFacadeREST extends AbstractFacade<Article> {
         map.put("dataPubli", article.getPublicationDate());
         map.put("nViews", article.getViews());
         map.put("topics", article.getTopics());
+        map.put("isPrivate",article.getIsPrivate());
+
         return map;
     }).collect(Collectors.toList());
 
@@ -139,6 +141,7 @@ public Response obtenirArticle(@PathParam("id") Long id, @Context HttpHeaders he
         result.put("nViews", article.getViews());
         result.put("topics", article.getTopics());
         result.put("imatge",article.getImage());
+        result.put("isPrivate",article.getIsPrivate());
 
         return Response.ok(result).build();
 

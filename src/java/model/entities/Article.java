@@ -28,8 +28,8 @@ public class Article implements Serializable {
 
     private String title; // Títol de l'article
     private String content; // Contingut complet de l'article
-    
-    private Boolean isPrivate = false; //
+   @Column(columnDefinition = "BOOLEAN")
+    private boolean isPrivate;
 
     private LocalDateTime publicationDate; // Data de publicació
     private int views; // Nombre de visualitzacions
@@ -69,11 +69,11 @@ public class Article implements Serializable {
         this.content = content;
     }
     
-    public Boolean getIsPrivate() {
+    public boolean getIsPrivate() {
         return isPrivate;
     }
 
-    public void setIsPrivate(Boolean isPrivate) {
+    public void setIsPrivate(boolean isPrivate) {
         this.isPrivate = isPrivate;
     }
 
