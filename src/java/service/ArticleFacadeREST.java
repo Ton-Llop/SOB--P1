@@ -99,6 +99,7 @@ public class ArticleFacadeREST extends AbstractFacade<Article> {
         map.put("dataPubli", article.getPublicationDate());
         map.put("nViews", article.getViews());
         map.put("topics", article.getTopics());
+        map.put("imatge", article.getImage());
         map.put("isPrivate",article.getIsPrivate());
 
         return map;
