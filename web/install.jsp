@@ -49,7 +49,9 @@
             "INSERT INTO " + schema + ".TOPIC VALUES (NEXT VALUE FOR TOPIC_GEN, 'Linux Guia')",
             "INSERT INTO " + schema + ".TOPIC VALUES (NEXT VALUE FOR TOPIC_GEN, 'Sistemes Oberts')",
             "INSERT INTO " + schema + ".TOPIC VALUES (NEXT VALUE FOR TOPIC_GEN, 'Computadors')",
-            "INSERT INTO " + schema + ".ARTICLE (id, title, content, isprivate, publicationdate, views, image, author) VALUES (NEXT VALUE FOR ARTICLE_GEN, 'Primer article', 'Contingut del primer article', 1, CURRENT_TIMESTAMP, 10, 'imatge1',1)",
+            "INSERT INTO " + schema + ".ARTICLE (id, title, content, isprivate, publicationdate, views, image, author) VALUES (NEXT VALUE FOR ARTICLE_GEN, 'Primer article', 'Contingut del primer article', 1, CURRENT_TIMESTAMP, 10, 'imatge1',3)",
+            "INSERT INTO " + schema + ".ARTICLE (id, title, content, isprivate, publicationdate, views, image, author) VALUES (NEXT VALUE FOR ARTICLE_GEN, '2 article', 'Contingut del 2 article', 0, CURRENT_TIMESTAMP, 10, 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Pyke_44.jpg',3)",
+            "INSERT INTO " + schema + ".ARTICLE_TOPICS (article_id, topics) VALUES (2, 'Linux Guia')",
             "INSERT INTO " + schema + ".ARTICLE_TOPICS (article_id, topics) VALUES (1, 'Linux Guia')"
             };
             for (String datum : data) {

@@ -92,6 +92,7 @@ public class ArticleFacadeREST extends AbstractFacade<Article> {
 
     List<Map<String, Object>> result = articles.stream().map(article -> {
         Map<String, Object> map = new HashMap<>();
+        map.put("id", article.getId()); // Agregar el ID
         map.put("titol", article.getTitle());
         map.put("descripcio", article.getContent());
         map.put("nomAut", article.getAuthor().getUsername());
@@ -112,8 +113,10 @@ public Response obtenirArticle(@PathParam("id") Long id, @Context HttpHeaders he
     try {
         System.out.println("Buscando artículo con ID: " + id);
 
-        // Recuperar el artículo de la base de datos
-        Article article = em.find(Article.class, id);
+        // Recuperar el artículo con el autor
+        Article article = em.createQuery("SELECT a FROM Article a JOIN FETCH a.author WHERE a.id = :id", Article.class)
+                            .setParameter("id", id)
+                            .getSingleResult();
 
         if (article == null) {
             System.out.println("Artículo no encontrado.");
@@ -122,33 +125,33 @@ public Response obtenirArticle(@PathParam("id") Long id, @Context HttpHeaders he
                            .build();
         }
 
-        System.out.println("Artículo encontrado: " + article);
-
-        // Comprobar si el artículo es privado
-        if (article.getIsPrivate()) {
-            
-            // Esta reg?
-            if (!validarRegistrat(headers)) {
-                return Response.status(Response.Status.UNAUTHORIZED)
-                               .entity("Aquest article és privat i has d'estar registrat")
-                               .build();
-            }
-        }
-
         // Incrementar las visualizaciones del artículo
         article.setViews(article.getViews() + 1);
-        em.merge(article); // Persistir los cambios en la base de datos
+        em.merge(article);
 
-        System.out.println("Devolviendo el artículo...");
-        return Response.ok().entity(article).build();
+        // Construir la respuesta manualmente
+        Map<String, Object> result = new HashMap<>();
+        result.put("id", article.getId());
+        result.put("titol", article.getTitle());
+        result.put("descripcio", article.getContent());
+        result.put("nomAut", article.getAuthor().getUsername());
+        result.put("dataPubli", article.getPublicationDate());
+        result.put("nViews", article.getViews());
+        result.put("topics", article.getTopics());
+        result.put("imatge",article.getImage());
+
+        return Response.ok(result).build();
 
     } catch (Exception e) {
-        e.printStackTrace(); // Registrar el error para depuración
+        e.printStackTrace();
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                        .entity("Error al processar la sol·licitud: " + e.getMessage())
                        .build();
     }
 }
+
+
+
 
 
 
