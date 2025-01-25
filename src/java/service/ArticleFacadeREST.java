@@ -273,27 +273,39 @@ private boolean validarRegistrat(HttpHeaders headers) {
     List<String> headersAuth = headers.getRequestHeader(HttpHeaders.AUTHORIZATION);
 
     if (headersAuth == null || headersAuth.isEmpty()) {
+        System.out.println("Encabezado Authorization no encontrado.");
         return false;
-    } else {
-        try {
-            // Decodificar y extraer usuario y contraseña
-            String auth = headersAuth.get(0).replace("Basic ", "");
-            String decode = new String(Base64.getDecoder().decode(auth), StandardCharsets.UTF_8);
-            StringTokenizer tokenizer = new StringTokenizer(decode, ":");
-            String username = tokenizer.nextToken();
-            String password = tokenizer.nextToken();
+    }
 
-            // Validar credenciales contra la base de datos
-            TypedQuery<Credentials> query = em.createNamedQuery("Credentials.findUser", Credentials.class);
-            Credentials c = query.setParameter("username", username).getSingleResult();
+    try {
+        // Decodificar y extraer usuario y contraseña
+        String auth = headersAuth.get(0).replace("Basic ", "");
+        String decode = new String(Base64.getDecoder().decode(auth), StandardCharsets.UTF_8);
 
-            // Comprobar si las credenciales son válidas
-            return c.getPassword().equals(password);
-        } catch (Exception e) {
-            return false;
-        }
+        System.out.println("Credenciales decodificadas: " + decode);
+
+        StringTokenizer tokenizer = new StringTokenizer(decode, ":");
+        String username = tokenizer.nextToken();
+        String password = tokenizer.nextToken();
+
+        System.out.println("Username: " + username);
+        System.out.println("Password: " + password);
+
+        // Validar credenciales contra la base de datos
+        TypedQuery<Credentials> query = em.createNamedQuery("Credentials.findUser", Credentials.class);
+        Credentials c = query.setParameter("username", username).getSingleResult();
+
+        // Comprobar si las credenciales son válidas
+        boolean isValid = c.getPassword().equals(password);
+        System.out.println("Validación de credenciales: " + isValid);
+        return isValid;
+
+    } catch (Exception e) {
+        System.err.println("Error validando las credenciales: " + e.getMessage());
+        return false;
     }
 }
+
 private String extractUsername(HttpHeaders headers) {
     try {
         // Obtener el encabezado Authorization
