@@ -197,6 +197,7 @@ private String extractUsername(HttpHeaders headers) {
         return null;    
     }
 }
+
 @GET
 @Path("/LoginVerification")
 @Produces(MediaType.APPLICATION_JSON)
